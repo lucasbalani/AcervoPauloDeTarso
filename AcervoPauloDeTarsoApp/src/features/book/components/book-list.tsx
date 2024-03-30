@@ -1,50 +1,83 @@
-import { Box, Heading, HStack, Avatar, VStack, Divider, Spacer, useTheme, Card, ScrollView } from "native-base";
-import { useState, useEffect } from "react";
-import { Text, FlatList } from "react-native";
-import BookService from "../services/book-service";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { Avatar, Box, Button, Divider, HStack, Pressable, Spacer, VStack, useTheme } from "native-base";
+import { useEffect, useRef, useState } from "react";
+import { FlatList, Text } from "react-native";
 import Book from "../models/book.model";
+import BookService from "../services/book-service";
+import { NavigationProp, ParamListBase, useFocusEffect, useNavigation } from "@react-navigation/native";
+import { openDatabase } from "react-native-sqlite-storage";
 
-const BookList = () => {
+interface BookListProps {
+    showAddButton?: boolean;
+}
+
+const BookList = ({ showAddButton = false }: BookListProps) => {
     const [books, setBooks] = useState<Book[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const navigation: NavigationProp<ParamListBase> = useNavigation();
     const appTheme = useTheme();
 
+    const navigationRef = useRef(null);
+
     const fetchData = async () => {
-        setBooks(await BookService.instance.list())
+        const db = await connectToDatabase();
+
+        setBooks(await BookService.instance.list(db))
+        setIsLoading(false);
     }
 
+    const connectToDatabase = async () => {
+        return openDatabase(
+            { name: "acervoPauloDeTarsoApp.db", location: "default" },
+            () => { },
+            (error) => {
+                console.error(error)
+                throw Error("Could not connect to database")
+            }
+        )
+    }
+
+
     useEffect(() => {
-        if (books.length === 0)
+
+        if (isLoading)
             fetchData()
-    }, [books]);
+    }, [books, isLoading]);
 
     return (
         <Box style={{ padding: 8 }}>
-            <Card style={{ maxHeight: 600 }}>
-                <Heading fontSize="xl" p="4">
-                    <Text>Livros</Text>
-                </Heading>
-                <ScrollView w={"100%"} h="80">
-                    <FlatList
-                        data={books}
-                        style={{ padding: 16, paddingTop: 0 }}
-                        renderItem={({ item }) =>
-                            <Box style={{ marginTop: 8 }}>
-                                <HStack space={[2, 3]} justifyContent="space-between">
-                                    <Avatar size="md" source={{ uri: item.image }}
-                                        style={{ borderColor: appTheme.colors.secondary[100], borderStyle: "dotted", borderWidth: 2 }} />
-                                    <VStack>
-                                        <Text style={{ fontSize: 16, fontWeight: "bold" }}>{item.title}</Text>
-                                        <Divider />
-                                        <Text style={{ fontSize: 10, fontStyle: "italic", color: appTheme.colors.warning[900] }}>{item.autor}</Text>
-                                    </VStack>
-                                    <Spacer />
-                                </HStack>
-                                <Divider style={{ marginTop: 5 }} />
-                            </Box>
-                        }
-                    />
-                </ScrollView>
-            </Card>
+            <HStack p="4" w="100%" justifyContent={'space-between'} alignItems='center'>
+                <Text style={{ fontWeight: "bold", fontSize: 20 }}>Livros</Text>
+                {!!showAddButton && (
+                    <Button shadow={2} onPress={() => navigation.navigate("BookForm", { bookId: undefined })}>
+                        <FontAwesomeIcon icon={"plus"} />
+                    </Button>
+                )}
+            </HStack>
+            <Divider />
+            {/* </Heading> */}
+            <FlatList
+                data={books}
+                style={{ padding: 16, paddingTop: 0 }}
+                renderItem={({ item }) =>
+                    <Pressable onPress={() => navigation.navigate("BookForm", { bookId: item.id })}>
+                        <Box style={{ marginTop: 8 }}>
+                            <HStack space={[2, 3]} justifyContent="space-between">
+                                <Avatar size="md" source={{ uri: item.image }}
+                                    style={{ borderColor: appTheme.colors.secondary[100], borderStyle: "dotted", borderWidth: 2 }} />
+                                <VStack>
+                                    <Text style={{ fontSize: 16, fontWeight: "bold" }}>{item.title}</Text>
+                                    <Divider />
+                                    <Text style={{ fontSize: 10, fontStyle: "italic", color: appTheme.colors.warning[900] }}>{item.autor}</Text>
+                                </VStack>
+                                <Spacer />
+                            </HStack>
+                            <Divider style={{ marginTop: 5 }} />
+                        </Box>
+                    </Pressable>
+                }
+            />
         </Box>
     )
 }

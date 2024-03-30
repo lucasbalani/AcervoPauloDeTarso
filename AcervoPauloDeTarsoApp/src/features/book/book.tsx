@@ -1,9 +1,10 @@
 import { Text } from "react-native"
+import BookList from "./components/book-list";
 
 const Book = () => {
     return (
         <>
-            <Text>Book Page</Text>
+            <BookList showAddButton={true}/>
         </>
     )
 }

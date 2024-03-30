@@ -6,13 +6,16 @@ import {
   NativeBaseProvider,
   extendTheme
 } from 'native-base';
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import Home from './src/features/home/home';
 import Book from './src/features/book/book';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import Routes from './src/Routes';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
+import { SQLiteDatabase, enablePromise, openDatabase } from 'react-native-sqlite-storage';
+
+enablePromise(true)
 
 const appTheme: ITheme = extendTheme({
   colors: {
@@ -100,11 +103,55 @@ const appTheme: ITheme = extendTheme({
 //   );
 // };
 const App = () => {
+
+  const loadData = useCallback(async () => {
+    try {
+      const db = await connectToDatabase()
+
+      await createTables(db)
+    } catch (error) {
+      console.error(error)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
   library.add(fas)
+
   return (
     <NativeBaseProvider theme={appTheme}>
-        <Routes />
+      <Routes />
     </NativeBaseProvider>
   );
+}
+const connectToDatabase = async () => {
+  return openDatabase(
+    { name: "acervoPauloDeTarsoApp.db", location: "default" },
+    () => { },
+    (error) => {
+      console.error(error)
+      throw Error("Could not connect to database")
+    }
+  )
+}
+
+const createTables = async (db: SQLiteDatabase) => {
+  const createTableBooksQuery = `
+    CREATE TABLE IF NOT EXISTS books (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT,
+      image TEXT,
+      autor TEXT
+    );
+  `
+
+  try {
+    await db.executeSql(createTableBooksQuery)
+  } catch (error) {
+    console.error(error)
+    throw Error(`Failed to create tables`)
+  }
 }
 export default App;

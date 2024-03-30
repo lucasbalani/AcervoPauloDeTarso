@@ -5,6 +5,7 @@ import Home from "./features/home/home";
 import { Avatar, HStack, IconButton, useTheme } from "native-base";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import React from "react";
+import BookForm from "./features/book/components/book-form";
 
 const CustomDrawerContent = (props: any) => {
     const { navigation, state, descriptors } = props;
@@ -37,6 +38,10 @@ const CustomDrawerContent = (props: any) => {
     );
 };
 
+const NullDrawer = () => {
+    return (null);
+}
+
 const Drawer = createDrawerNavigator();
 
 const Routes = () => {
@@ -58,7 +63,6 @@ const Routes = () => {
         <NavigationContainer theme={navigationTheme}>
             <Drawer.Navigator initialRouteName="Home" drawerContent={(props) => <CustomDrawerContent {...props} />}>
                 <Drawer.Screen
-
                     name="Home"
                     component={Home}
                     options={{
@@ -86,6 +90,19 @@ const Routes = () => {
                         </IconButton>,
                         headerStyle: { backgroundColor: appTheme.colors.primary[900] },
                         title: "Livros",
+                    }}
+                />
+
+                {/* Form livro */}
+                <Drawer.Screen
+                    name="BookForm"
+                    component={BookForm}
+                    initialParams={{bookId: null}}
+                    options={{
+                        drawerItemStyle: { display: 'none', height: 0 },
+                        headerStyle: { backgroundColor: appTheme.colors.primary[900] },
+                        title: "Livro",
+                        
                     }}
                 />
             </Drawer.Navigator>
