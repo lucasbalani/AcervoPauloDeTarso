@@ -14,6 +14,7 @@ import Routes from './src/Routes';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { SQLiteDatabase, enablePromise, openDatabase } from 'react-native-sqlite-storage';
+import { RecoilRoot } from 'recoil';
 
 enablePromise(true)
 
@@ -122,7 +123,9 @@ const App = () => {
 
   return (
     <NativeBaseProvider theme={appTheme}>
-      <Routes />
+      <RecoilRoot>
+        <Routes />
+      </RecoilRoot>
     </NativeBaseProvider>
   );
 }

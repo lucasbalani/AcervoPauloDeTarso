@@ -6,10 +6,15 @@ import React, { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BookService from "../services/book-service";
 import { openDatabase } from "react-native-sqlite-storage";
+import { useRecoilState } from "recoil";
+import { isLoadingBookAdmin } from "../states/isLoadingBookAdmin";
+import { isLoadingBookHome } from "../states/isLoadingBookHome";
 
 const BookForm = () => {
     const route = useRoute<any>();
     const { bookId } = route.params;
+    const [loadingBookHome, setIsLoadingBookHome] = useRecoilState(isLoadingBookHome);
+    const [loadingBookAdmin, setIsLoadingBookAdmin] = useRecoilState(isLoadingBookAdmin);
 
     const {
         control,
@@ -23,10 +28,17 @@ const BookForm = () => {
 
     const handleSave = async () => {
         const values = getValues();
-        const bookCreate: Book = { id: 0, title: values.title, autor: values.autor, image: values.image }
+        const bookCreate: Book = {
+            id: 0,
+            title: values.title,
+            autor: values.autor,
+            image: values.image
+        }
 
         await BookService.instance.createBook(await connectToDatabase(), bookCreate);
         reset();
+        setIsLoadingBookHome(true);
+        setIsLoadingBookAdmin(true);
     }
 
     useEffect(() => {

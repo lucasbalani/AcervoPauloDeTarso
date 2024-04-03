@@ -6,6 +6,9 @@ import Book from "../models/book.model";
 import BookService from "../services/book-service";
 import { NavigationProp, ParamListBase, useFocusEffect, useNavigation } from "@react-navigation/native";
 import { openDatabase } from "react-native-sqlite-storage";
+import { useRecoilState } from "recoil";
+import { isLoadingBookAdmin } from "../states/isLoadingBookAdmin";
+import { isLoadingBookHome } from "../states/isLoadingBookHome";
 
 interface BookListProps {
     showAddButton?: boolean;
@@ -13,7 +16,7 @@ interface BookListProps {
 
 const BookList = ({ showAddButton = false }: BookListProps) => {
     const [books, setBooks] = useState<Book[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [isLoading, setIsLoading] = useRecoilState(!!showAddButton ? isLoadingBookAdmin : isLoadingBookHome);
 
     const navigation: NavigationProp<ParamListBase> = useNavigation();
     const appTheme = useTheme();
@@ -38,11 +41,15 @@ const BookList = ({ showAddButton = false }: BookListProps) => {
         )
     }
 
-
     useEffect(() => {
-
         if (isLoading)
             fetchData()
+
+        return () => {
+
+            if (!!isLoading)
+                setIsLoading(false);
+        }
     }, [books, isLoading]);
 
     return (
@@ -56,6 +63,7 @@ const BookList = ({ showAddButton = false }: BookListProps) => {
                 )}
             </HStack>
             <Divider />
+            
             {/* </Heading> */}
             <FlatList
                 data={books}
