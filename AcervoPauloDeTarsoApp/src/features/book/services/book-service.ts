@@ -96,7 +96,7 @@ export default class BookService {
     const listAllBooksQuery = `
       SELECT * FROM books ORDER BY title
     `
-    
+
     try {
       const results = await db.executeSql(listAllBooksQuery);
 
@@ -114,8 +114,6 @@ export default class BookService {
   }
 
   async createBook(db: SQLiteDatabase, book: Book) {
-    console.log(1);
-    
     const insertQuery = `
       INSERT INTO Books (title, image, autor)
       VALUES (?, ?, ?)
@@ -129,12 +127,55 @@ export default class BookService {
 
     try {
       const results = await db.executeSql(insertQuery, values)
-      console.log(results[0].rows.item(0));
-      
+
       return results[0].rows.item(0)
     } catch (error) {
       console.error(error)
-      throw Error("Failed to add contact")
+      throw Error("Falha ao criar o livro")
+    }
+  }
+
+  async updateBook(db: SQLiteDatabase, book: Book) {
+    const updateQuery = `
+      UPDATE
+        Books
+      SET
+        Title = '${book.title}'
+        Image = '${book.image}'
+        Autor = '${book.autor}'
+      Where
+        Id = ${book.id}
+    `
+
+    try {
+      const result = await db.executeSql(updateQuery)
+
+      return result[0].rows.item(0)
+    } catch (error) {
+      console.error(error)
+      throw Error("Falha ao atualizar o livro")
+    }
+  }
+
+  async findBook(db: SQLiteDatabase, bookId: number): Promise<Book> {
+    const findQuery = `SELECT 
+                        * 
+                       FROM 
+                        Books 
+                       WHERE 
+                        Id = ${bookId}`
+
+    try {
+      const result = await db.executeSql(findQuery)
+
+      const bookQuery = result[0].rows.item(0);
+
+      if (!bookQuery)
+        throw Error();
+
+      return bookQuery;
+    } catch (error) {
+      throw Error("Livro não existe")
     }
   }
 }

@@ -9,12 +9,14 @@ import { openDatabase } from "react-native-sqlite-storage";
 import { useRecoilState } from "recoil";
 import { isLoadingBookAdmin } from "../states/isLoadingBookAdmin";
 import { isLoadingBookHome } from "../states/isLoadingBookHome";
+import { isLoadingFindBook } from "../states/isLoadingFindBook";
 
 const BookForm = () => {
     const route = useRoute<any>();
     const { bookId } = route.params;
     const [loadingBookHome, setIsLoadingBookHome] = useRecoilState(isLoadingBookHome);
     const [loadingBookAdmin, setIsLoadingBookAdmin] = useRecoilState(isLoadingBookAdmin);
+    const [loadingFindBook, setIsLoadingFindBook] = useRecoilState(isLoadingFindBook);
 
     const {
         control,
@@ -29,21 +31,43 @@ const BookForm = () => {
     const handleSave = async () => {
         const values = getValues();
         const bookCreate: Book = {
-            id: 0,
+            id: values.id,
             title: values.title,
             autor: values.autor,
             image: values.image
         }
 
-        await BookService.instance.createBook(await connectToDatabase(), bookCreate);
+        !bookId ? await BookService.instance.createBook(await connectToDatabase(), bookCreate) :
+            await BookService.instance.updateBook(await connectToDatabase(), bookCreate)
+
         reset();
         setIsLoadingBookHome(true);
         setIsLoadingBookAdmin(true);
     }
 
+    const removeBook = async (bookId: number) => {
+
+    }
+
+    const findBook = async () => {
+        reset();
+        const book = await BookService.instance.findBook(await connectToDatabase(), bookId)
+
+        if (!!book) {
+            setValue("id", book.id);
+            setValue("title", book.title);
+            setValue("image", book.image);
+            setValue("autor", book.autor);
+        }
+
+        setIsLoadingFindBook(false);
+    }
+
     useEffect(() => {
-        reset()
-    }, []);
+
+        if (!!bookId && loadingFindBook)
+            findBook();
+    }, [loadingFindBook]);
 
     const connectToDatabase = async () => {
         return openDatabase(
@@ -101,7 +125,7 @@ const BookForm = () => {
                 />
             </Box>
             <HStack w={"100%"} marginTop={5} alignItems="center" justifyContent="flex-end">
-                <Button shadow={2} onPress={() => handleSave()}>
+                <Button disabled={!!loadingFindBook} shadow={2} onPress={() => handleSave()}>
                     <HStack alignItems="center">
                         <FontAwesomeIcon style={{ marginEnd: 5 }} icon={"check"} />
                         <Text>Salvar</Text>

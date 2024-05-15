@@ -9,6 +9,7 @@ import { openDatabase } from "react-native-sqlite-storage";
 import { useRecoilState } from "recoil";
 import { isLoadingBookAdmin } from "../states/isLoadingBookAdmin";
 import { isLoadingBookHome } from "../states/isLoadingBookHome";
+import { isLoadingFindBook } from "../states/isLoadingFindBook";
 
 interface BookListProps {
     showAddButton?: boolean;
@@ -17,6 +18,7 @@ interface BookListProps {
 const BookList = ({ showAddButton = false }: BookListProps) => {
     const [books, setBooks] = useState<Book[]>([]);
     const [isLoading, setIsLoading] = useRecoilState(!!showAddButton ? isLoadingBookAdmin : isLoadingBookHome);
+    const [loadingFindBook, setIsLoadingFindBook] = useRecoilState(isLoadingFindBook);
 
     const navigation: NavigationProp<ParamListBase> = useNavigation();
     const appTheme = useTheme();
@@ -41,15 +43,16 @@ const BookList = ({ showAddButton = false }: BookListProps) => {
         )
     }
 
+    const selectBook = (bookSelectedId: number) => {
+        setIsLoadingFindBook(true);
+        
+        navigation.navigate("BookForm", { bookId: bookSelectedId })
+    }
+
     useEffect(() => {
         if (isLoading)
             fetchData()
 
-        return () => {
-
-            if (!!isLoading)
-                setIsLoading(false);
-        }
     }, [books, isLoading]);
 
     return (
@@ -69,7 +72,7 @@ const BookList = ({ showAddButton = false }: BookListProps) => {
                 data={books}
                 style={{ padding: 16, paddingTop: 0 }}
                 renderItem={({ item }) =>
-                    <Pressable onPress={() => navigation.navigate("BookForm", { bookId: item.id })}>
+                    <Pressable onPress={() => selectBook(item.id)}>
                         <Box style={{ marginTop: 8 }}>
                             <HStack space={[2, 3]} justifyContent="space-between">
                                 <Avatar size="md" source={{ uri: item.image }}
