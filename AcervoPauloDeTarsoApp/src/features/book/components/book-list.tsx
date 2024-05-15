@@ -109,7 +109,7 @@ const BookList = ({ showAddButton = false, showRemoveButton = false }: BookListP
                                 </Pressable>
                                 {!!showRemoveButton && (
                                     <Pressable onPress={() => removeBook(item.id)}>
-                                        <FontAwesomeIcon color="red" icon={"trash"} />
+                                        <FontAwesomeIcon color={appTheme.colors.error[600]} icon={"trash"} />
                                     </Pressable>
                                 )}
                             </HStack>
