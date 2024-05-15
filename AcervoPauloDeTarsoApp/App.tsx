@@ -140,13 +140,18 @@ const connectToDatabase = async () => {
   )
 }
 
+//#region Livros
+
 const createTables = async (db: SQLiteDatabase) => {
+  console.log(2222);
+
   const createTableBooksQuery = `
     CREATE TABLE IF NOT EXISTS books (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT,
       image TEXT,
-      autor TEXT
+      autor TEXT,
+      isbn TEXT
     );
   `
 
@@ -157,4 +162,6 @@ const createTables = async (db: SQLiteDatabase) => {
     throw Error(`Failed to create tables`)
   }
 }
+
+//#endregion
 export default App;

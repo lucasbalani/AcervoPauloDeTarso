@@ -10,13 +10,15 @@ import { useRecoilState } from "recoil";
 import { isLoadingBookAdmin } from "../states/isLoadingBookAdmin";
 import { isLoadingBookHome } from "../states/isLoadingBookHome";
 import { isLoadingFindBook } from "../states/isLoadingFindBook";
+import { clearBookForm } from "../states/clearBookForm";
 
 const BookForm = () => {
     const route = useRoute<any>();
     const { bookId } = route.params;
     const [loadingBookHome, setIsLoadingBookHome] = useRecoilState(isLoadingBookHome);
     const [loadingBookAdmin, setIsLoadingBookAdmin] = useRecoilState(isLoadingBookAdmin);
-    const [loadingFindBook, setIsLoadingFindBook] = useRecoilState(isLoadingFindBook);
+    const [loadingFindBook, setLoadingFindBook] = useRecoilState(isLoadingFindBook);
+    const [clearForm, setClearForm] = useRecoilState(clearBookForm);
 
     const {
         control,
@@ -34,7 +36,8 @@ const BookForm = () => {
             id: values.id,
             title: values.title,
             autor: values.autor,
-            image: values.image
+            image: values.image,
+            isbn: values.isbn
         }
 
         !bookId ? await BookService.instance.createBook(await connectToDatabase(), bookCreate) :
@@ -43,10 +46,6 @@ const BookForm = () => {
         reset();
         setIsLoadingBookHome(true);
         setIsLoadingBookAdmin(true);
-    }
-
-    const removeBook = async (bookId: number) => {
-
     }
 
     const findBook = async () => {
@@ -58,9 +57,10 @@ const BookForm = () => {
             setValue("title", book.title);
             setValue("image", book.image);
             setValue("autor", book.autor);
+            setValue("isbn", book.isbn);
         }
 
-        setIsLoadingFindBook(false);
+        setLoadingFindBook(false);
     }
 
     useEffect(() => {
@@ -68,6 +68,11 @@ const BookForm = () => {
         if (!!bookId && loadingFindBook)
             findBook();
     }, [loadingFindBook]);
+
+    useEffect(() => {
+        reset();
+
+    }, [clearForm]);
 
     const connectToDatabase = async () => {
         return openDatabase(
@@ -118,6 +123,20 @@ const BookForm = () => {
                     render={({ field }) => (
                         <Input
                             placeholder="Autor"
+                            onChangeText={field.onChange}
+                            value={field.value}
+                        />
+                    )}
+                />
+            </Box>
+            <Box style={{ marginTop: 20 }}>
+                <Controller
+                    name="isbn"
+                    control={control}
+                    rules={{ required: 'Campo obrigatório' }}
+                    render={({ field }) => (
+                        <Input
+                            placeholder="Isbn"
                             onChangeText={field.onChange}
                             value={field.value}
                         />
