@@ -38,9 +38,31 @@ export default class BookService {
     }
   }
 
+  async findBook(db: SQLiteDatabase, bookId: number): Promise<Book> {
+    const findQuery = `SELECT 
+                        * 
+                       FROM 
+                        Books 
+                       WHERE 
+                        Id = ${bookId}`
+
+    try {
+      const result = await db.executeSql(findQuery)
+
+      const bookQuery = result[0].rows.item(0);
+
+      if (!bookQuery)
+        throw Error();
+
+      return bookQuery;
+    } catch (error) {
+      throw Error("Livro não existe")
+    }
+  }
+
   async createBook(db: SQLiteDatabase, book: Book) {
     const insertQuery = `
-      INSERT INTO Books (title, image, autor, isbn)
+      INSERT INTO Books (title, image, autor, classification, isbn)
       VALUES (?, ?, ?, ?)
     `
 
@@ -48,6 +70,7 @@ export default class BookService {
       book.title,
       book.image,
       book.autor,
+      book.classification,
       book.isbn,
     ]
 
@@ -83,7 +106,8 @@ export default class BookService {
         Title = '${book.title}',
         Image = '${book.image}',
         Autor = '${book.autor}',
-        Isbn = '${book.isbn}'
+        Classification = '${book.classification}',
+        Isbn = '${book.isbn}',
       Where
         Id = ${book.id}
     `
@@ -95,28 +119,6 @@ export default class BookService {
     } catch (error) {
       console.error(error)
       throw Error("Falha ao atualizar o livro")
-    }
-  }
-
-  async findBook(db: SQLiteDatabase, bookId: number): Promise<Book> {
-    const findQuery = `SELECT 
-                        * 
-                       FROM 
-                        Books 
-                       WHERE 
-                        Id = ${bookId}`
-
-    try {
-      const result = await db.executeSql(findQuery)
-
-      const bookQuery = result[0].rows.item(0);
-
-      if (!bookQuery)
-        throw Error();
-
-      return bookQuery;
-    } catch (error) {
-      throw Error("Livro não existe")
     }
   }
 }

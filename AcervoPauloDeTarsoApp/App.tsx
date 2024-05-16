@@ -111,7 +111,8 @@ const connectToDatabase = async () => {
 //#region Livros
 
 const createTables = async (db: SQLiteDatabase) => {
-  console.log(2222);
+
+  // const removeTable = `DROP TABLE books`;
 
   const createTableBooksQuery = `
     CREATE TABLE IF NOT EXISTS books (
@@ -119,6 +120,7 @@ const createTables = async (db: SQLiteDatabase) => {
       title TEXT,
       image TEXT,
       autor TEXT,
+      classification TEXT,
       isbn TEXT
     );
   `

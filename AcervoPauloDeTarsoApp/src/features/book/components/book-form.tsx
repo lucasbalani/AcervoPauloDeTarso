@@ -37,7 +37,8 @@ const BookForm = () => {
             title: values.title,
             autor: values.autor,
             image: values.image,
-            isbn: values.isbn
+            isbn: values.isbn,
+            classification: values.classification
         }
 
         !bookId ? await BookService.instance.createBook(await connectToDatabase(), bookCreate) :
@@ -58,6 +59,7 @@ const BookForm = () => {
             setValue("image", book.image);
             setValue("autor", book.autor);
             setValue("isbn", book.isbn);
+            setValue("classification", book.classification);
         }
 
         setLoadingFindBook(false);
@@ -137,6 +139,20 @@ const BookForm = () => {
                     render={({ field }) => (
                         <Input
                             placeholder="Isbn"
+                            onChangeText={field.onChange}
+                            value={field.value}
+                        />
+                    )}
+                />
+            </Box>
+            <Box style={{ marginTop: 20 }}>
+                <Controller
+                    name="classification"
+                    control={control}
+                    rules={{ required: 'Campo obrigatório' }}
+                    render={({ field }) => (
+                        <Input
+                            placeholder="Classificação"
                             onChangeText={field.onChange}
                             value={field.value}
                         />
