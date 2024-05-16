@@ -17,6 +17,8 @@ const CustomDrawerContent = (props: any) => {
                 return <FontAwesomeIcon color={appTheme.colors.secondary[900]} icon={"house"} />
             case "Book":
                 return <FontAwesomeIcon color={appTheme.colors.secondary[900]} icon={"book"} />
+            case "BookForm":
+                return <FontAwesomeIcon color={appTheme.colors.secondary[900]} icon={"plus-circle"} />
         }
     }
 
@@ -97,12 +99,19 @@ const Routes = () => {
                 <Drawer.Screen
                     name="BookForm"
                     component={BookForm}
-                    initialParams={{bookId: null}}
+                    initialParams={{ bookId: null }}
                     options={{
-                        drawerItemStyle: { display: 'none', height: 0 },
+                        headerRight: () => <IconButton
+                            size={"sm"}
+                            onPress={() => console.log("logout")}>
+                            <HStack>
+                                <FontAwesomeIcon icon={"right-to-bracket"} />
+                            </HStack>
+                        </IconButton>,
+                        // drawerItemStyle: { display: 'none', height: 0 },
                         headerStyle: { backgroundColor: appTheme.colors.primary[900] },
-                        title: "Livro",
-                        
+                        title: "Novo livro",
+
                     }}
                 />
             </Drawer.Navigator>

@@ -3,4 +3,6 @@ export default interface Book {
     title: string,
     image: string,
     autor: string,
+    classification: string,
+    isbn: string,
 }

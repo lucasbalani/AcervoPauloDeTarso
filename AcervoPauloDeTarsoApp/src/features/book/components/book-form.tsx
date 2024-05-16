@@ -9,12 +9,16 @@ import { openDatabase } from "react-native-sqlite-storage";
 import { useRecoilState } from "recoil";
 import { isLoadingBookAdmin } from "../states/isLoadingBookAdmin";
 import { isLoadingBookHome } from "../states/isLoadingBookHome";
+import { isLoadingFindBook } from "../states/isLoadingFindBook";
+import { clearBookForm } from "../states/clearBookForm";
 
 const BookForm = () => {
     const route = useRoute<any>();
     const { bookId } = route.params;
     const [loadingBookHome, setIsLoadingBookHome] = useRecoilState(isLoadingBookHome);
     const [loadingBookAdmin, setIsLoadingBookAdmin] = useRecoilState(isLoadingBookAdmin);
+    const [loadingFindBook, setLoadingFindBook] = useRecoilState(isLoadingFindBook);
+    const [clearForm, setClearForm] = useRecoilState(clearBookForm);
 
     const {
         control,
@@ -29,21 +33,48 @@ const BookForm = () => {
     const handleSave = async () => {
         const values = getValues();
         const bookCreate: Book = {
-            id: 0,
+            id: values.id,
             title: values.title,
             autor: values.autor,
-            image: values.image
+            image: values.image,
+            isbn: values.isbn,
+            classification: values.classification
         }
 
-        await BookService.instance.createBook(await connectToDatabase(), bookCreate);
+        !bookId ? await BookService.instance.createBook(await connectToDatabase(), bookCreate) :
+            await BookService.instance.updateBook(await connectToDatabase(), bookCreate)
+
         reset();
         setIsLoadingBookHome(true);
         setIsLoadingBookAdmin(true);
     }
 
+    const findBook = async () => {
+        reset();
+        const book = await BookService.instance.findBook(await connectToDatabase(), bookId)
+
+        if (!!book) {
+            setValue("id", book.id);
+            setValue("title", book.title);
+            setValue("image", book.image);
+            setValue("autor", book.autor);
+            setValue("isbn", book.isbn);
+            setValue("classification", book.classification);
+        }
+
+        setLoadingFindBook(false);
+    }
+
     useEffect(() => {
-        reset()
-    }, []);
+
+        if (!!bookId && loadingFindBook)
+            findBook();
+    }, [loadingFindBook]);
+
+    useEffect(() => {
+        reset();
+
+    }, [clearForm]);
 
     const connectToDatabase = async () => {
         return openDatabase(
@@ -100,8 +131,36 @@ const BookForm = () => {
                     )}
                 />
             </Box>
+            <Box style={{ marginTop: 20 }}>
+                <Controller
+                    name="isbn"
+                    control={control}
+                    rules={{ required: 'Campo obrigatório' }}
+                    render={({ field }) => (
+                        <Input
+                            placeholder="Isbn"
+                            onChangeText={field.onChange}
+                            value={field.value}
+                        />
+                    )}
+                />
+            </Box>
+            <Box style={{ marginTop: 20 }}>
+                <Controller
+                    name="classification"
+                    control={control}
+                    rules={{ required: 'Campo obrigatório' }}
+                    render={({ field }) => (
+                        <Input
+                            placeholder="Classificação"
+                            onChangeText={field.onChange}
+                            value={field.value}
+                        />
+                    )}
+                />
+            </Box>
             <HStack w={"100%"} marginTop={5} alignItems="center" justifyContent="flex-end">
-                <Button shadow={2} onPress={() => handleSave()}>
+                <Button disabled={!!loadingFindBook} shadow={2} onPress={() => handleSave()}>
                     <HStack alignItems="center">
                         <FontAwesomeIcon style={{ marginEnd: 5 }} icon={"check"} />
                         <Text>Salvar</Text>

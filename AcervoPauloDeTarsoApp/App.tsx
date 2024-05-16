@@ -71,38 +71,6 @@ const appTheme: ITheme = extendTheme({
   }
 })
 
-// const App = () => {
-//   // Adiciona pacote de ícones solidos do FontAwesome
-//   library.add(fas)
-
-//   return (
-//     <NativeBaseProvider theme={appTheme}>
-//       <SafeAreaProvider>
-//         <StatusBar backgroundColor={"#a4c8ac"}></StatusBar>
-//         <Box style={{ height: "10%" }} backgroundColor={"primary.100"}>
-//           <HStack style={{ paddingLeft: 8, paddingRight: 8, height: "100%", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-//             <MenuAcervo />
-
-//             <Text>Início</Text>
-
-//             <IconButton
-//               size={"sm"}
-//               onPress={() => console.log("hello world")}>
-//               <HStack>
-//                 <FontAwesomeIcon icon={"right-to-bracket"} />
-//               </HStack>
-//             </IconButton>
-//           </HStack>
-//         </Box>
-//         <Divider backgroundColor={"success.100"}></Divider>
-
-//         {/* Conteúdo */}
-//         <Box style={{ height: "100%" }} backgroundColor={"#e8e8e8"}>
-//         </Box>
-//       </SafeAreaProvider>
-//     </NativeBaseProvider>
-//   );
-// };
 const App = () => {
 
   const loadData = useCallback(async () => {
@@ -140,13 +108,20 @@ const connectToDatabase = async () => {
   )
 }
 
+//#region Livros
+
 const createTables = async (db: SQLiteDatabase) => {
+
+  // const removeTable = `DROP TABLE books`;
+
   const createTableBooksQuery = `
     CREATE TABLE IF NOT EXISTS books (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT,
       image TEXT,
-      autor TEXT
+      autor TEXT,
+      classification TEXT,
+      isbn TEXT
     );
   `
 
@@ -157,4 +132,6 @@ const createTables = async (db: SQLiteDatabase) => {
     throw Error(`Failed to create tables`)
   }
 }
+
+//#endregion
 export default App;
