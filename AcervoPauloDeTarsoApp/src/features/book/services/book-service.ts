@@ -108,7 +108,7 @@ export default class BookService {
         Image = '${book.image}',
         Autor = '${book.autor}',
         Classification = '${book.classification}',
-        Isbn = '${book.isbn}',
+        Isbn = '${book.isbn}'
       Where
         Id = ${book.id}
     `
