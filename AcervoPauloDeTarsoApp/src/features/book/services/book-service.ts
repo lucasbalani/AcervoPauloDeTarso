@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import Book from "../models/book.model";
 import {
   SQLiteDatabase,
@@ -63,7 +64,7 @@ export default class BookService {
   async createBook(db: SQLiteDatabase, book: Book) {
     const insertQuery = `
       INSERT INTO Books (title, image, autor, classification, isbn)
-      VALUES (?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?)
     `
 
     const values = [
