@@ -33,8 +33,29 @@ const BookList = ({ showAddButton = false, showRemoveButton = false }: BookListP
 
     const fetchData = async () => {
         const db = await connectToDatabase();
+        const allBooks = await BookService.instance.list(db);
 
-        setBooks(await BookService.instance.list(db))
+        // agrupar os livros por classificação
+        const groupedBooks = allBooks.reduce((grouped, book) => {
+            (grouped[book.classification] =
+              grouped[book.classification] || []).push(book);
+            return grouped;
+        }, {});
+
+
+        /// transformar o objeto agrupado em um array achatado
+        const flatListData = Object.entries(groupedBooks).reduce(
+          (list, [classification, books]) => {
+            return list.concat(
+              {type: 'header', classification},
+              ...books.map(book => ({type: 'book', ...book})),
+            );
+            }
+        , []);
+        
+
+
+        setBooks(flatListData);
         setIsLoading(false);
     }
 
@@ -76,50 +97,74 @@ const BookList = ({ showAddButton = false, showRemoveButton = false }: BookListP
     }, [books, isLoading]);
 
     return (
-        <Box style={{ padding: 8 }}>
-            <HStack p="4" w="100%" justifyContent={'space-between'} alignItems='center'>
-                <Text style={{ fontWeight: "bold", fontSize: 20 }}>Livros</Text>
-                {!!showAddButton && (
-                    <Button shadow={2} onPress={() => newBook()}>
-                        <FontAwesomeIcon icon={"plus"} />
-                    </Button>
-                )}
-            </HStack>
-            <Divider />
+      <Box style={{padding: 8}}>
+        <HStack
+          p="4"
+          w="100%"
+          justifyContent={'space-between'}
+          alignItems="center">
+          <Text style={{fontWeight: 'bold', fontSize: 20}}>Livros</Text>
+          {!!showAddButton && (
+            <Button shadow={2} onPress={() => newBook()}>
+              <FontAwesomeIcon icon={'plus'} />
+            </Button>
+          )}
+        </HStack>
+        <Divider />
 
-            {/* </Heading> */}
-            <FlatList
-                data={books}
-                style={{ padding: 16, paddingTop: 0 }}
-                renderItem={({ item }) =>
-                    <>
-                        <Box style={{ marginTop: 8 }}>
-                            <HStack space={[2, 3]} justifyContent="space-between" alignItems={"center"}>
-                                <Pressable w={"80%"} onPress={() => selectBook(item.id)}>
-                                    <HStack space={[2, 3]} justifyContent="space-between">
-                                        <Avatar size="md" source={{ uri: item.image }}
-                                            style={{ borderColor: appTheme.colors.secondary[100], borderStyle: "dotted", borderWidth: 2 }} />
-                                        <VStack>
-                                            <Text style={{ fontSize: 16, fontWeight: "bold" }}>{item.title}</Text>
-                                            <Divider />
-                                            <Text style={{ fontSize: 10, fontStyle: "italic", color: appTheme.colors.warning[900] }}>{item.autor}</Text>
-                                        </VStack>
-                                        <Spacer />
-                                    </HStack>
-                                </Pressable>
-                                {!!showRemoveButton && (
-                                    <Pressable onPress={() => removeBook(item.id)}>
-                                        <FontAwesomeIcon color={appTheme.colors.error[600]} icon={"trash"} />
-                                    </Pressable>
-                                )}
-                            </HStack>
-                            <Divider style={{ marginTop: 5 }} />
-                        </Box>
-                    </>
-                }
-            />
-        </Box>
-    )
+        {/* </Heading> */}
+        <FlatList
+          data={books}
+          renderItem={({item}) => {
+            if (item.type === 'header') {
+              return (
+                <Box
+                  p="4"
+                  w="100%"
+                  >
+                  <Text style={{fontWeight: 'bold', fontSize: 20}}>
+                    {item.classification === 'null'
+                      ? 'Sem classificação'
+                      : item.classification}
+                  </Text>
+                </Box>
+              );
+            } else {
+              return (
+                <Pressable onPress={() => selectBook(item.id)}>
+                  <HStack
+                    p="4"
+                    w="100%"
+                    justifyContent={'space-between'}
+                    alignItems="center">
+                    <Avatar
+                      size="md"
+                      source={{
+                        uri: item.image,
+                      }}
+                    />
+                    <VStack padding={2} w="80%" alignItems="flex-start" marginLeft={3}>
+                      <Text>{item.title}</Text>
+                      <Text>{item.autor}</Text>
+                    </VStack>
+                    <Spacer />
+                    {!!showRemoveButton && (
+                      <Button
+                        shadow={2}
+                        onPress={() => removeBook(item.id)}
+                        colorScheme="danger">
+                        <FontAwesomeIcon icon={'trash'} />
+                      </Button>
+                    )}
+                  </HStack>
+                </Pressable>
+              );
+            }
+          }}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      </Box>
+    );
 }
 
 export default BookList;
