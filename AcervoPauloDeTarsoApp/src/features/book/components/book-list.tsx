@@ -152,7 +152,8 @@ const BookList = ({ showAddButton = false, showRemoveButton = false }: BookListP
                       <Button
                         shadow={2}
                         onPress={() => removeBook(item.id)}
-                        colorScheme="danger">
+                        colorScheme="danger"
+                        style={{ marginLeft:-25}}>
                         <FontAwesomeIcon icon={'trash'} />
                       </Button>
                     )}
