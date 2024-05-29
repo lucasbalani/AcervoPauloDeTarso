@@ -138,7 +138,7 @@ const BookForm = () => {
                     rules={{ required: 'Campo obrigatório' }}
                     render={({ field }) => (
                         <Input
-                            placeholder="Isbn"
+                            placeholder="ISBN"
                             onChangeText={field.onChange}
                             value={field.value}
                         />
