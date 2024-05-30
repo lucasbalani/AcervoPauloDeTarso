@@ -2,11 +2,28 @@ import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import BookList from './components/book-list';
 
+interface Book {
+  id: number;
+  title: string;
+  author: string;
+}
+
 const Book = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
+
+  const books: Book[] = [
+    { id: 1, title: 'Livro A', author: 'Autor A' },
+    { id: 2, title: 'Livro B', author: 'Autor B' },
+    // outros livros
+  ];
 
   const handleSearch = () => {
-    // Aqui você pode adicionar a lógica para lidar com a pesquisa
+    const filtered = books.filter(book => 
+      book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      book.author.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredBooks(filtered);
     console.log('Termo de pesquisa:', searchTerm);
   };
 
@@ -24,7 +41,7 @@ const Book = () => {
       >
         <Text style={styles.buttonText}>Pesquisar</Text>
       </TouchableOpacity>
-      <BookList showAddButton={true} showRemoveButton={true} />
+      <BookList books={filteredBooks} showAddButton={true} showRemoveButton={true} />
     </View>
   );
 };
