@@ -1,6 +1,6 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { DrawerContentScrollView, DrawerItem, DrawerItemList, createDrawerNavigator } from "@react-navigation/drawer";
-import Book from "./features/book/book";
+import BookSearch from "./features/book/book";
 import Home from "./features/home/home";
 import { Avatar, HStack, IconButton, useTheme } from "native-base";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
@@ -81,7 +81,7 @@ const Routes = () => {
                 />
                 <Drawer.Screen
                     name="Book"
-                    component={Book}
+                    component={BookSearch}
                     options={{
                         headerRight: () => <IconButton
                             size={"sm"}

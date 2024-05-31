@@ -39,6 +39,29 @@ export default class BookService {
     }
   }
 
+  async listBySearchTerm(db: SQLiteDatabase, searchTerm: string): Promise<Book[]> {
+    const books: Book[] = [];
+
+    const listAllBooksQuery = `
+      SELECT * FROM books WHERE Title like '%${searchTerm}%' ORDER BY title
+    `
+
+    try {
+      const results = await db.executeSql(listAllBooksQuery);
+
+      results?.forEach((result) => {
+        for (let index = 0; index < result.rows.length; index++) {
+          books.push(result.rows.item(index))
+        }
+      })
+
+      return books;
+    } catch (error) {
+      console.error(`[ERRO]: ${error}`)
+      return books;
+    }
+  }
+
   async findBook(db: SQLiteDatabase, bookId: number): Promise<Book> {
     const findQuery = `SELECT 
                         * 

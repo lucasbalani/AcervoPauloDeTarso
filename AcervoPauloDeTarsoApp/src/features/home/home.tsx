@@ -22,13 +22,6 @@ const HomePage :React.FC<Props> = ({ navigation }) => {
   );
 };
 
-const PaginaDeLivros = () => {
-  return (
-    <View style={styles.container}>
-      <Text>Página de livros</Text>
-    </View>
-  );
-};
 
 const styles = StyleSheet.create({
   container: {

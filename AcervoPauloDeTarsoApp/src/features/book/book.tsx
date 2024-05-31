@@ -1,29 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import BookList from './components/book-list';
 
-const Book = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const handleSearch = () => {
-    // Aqui você pode adicionar a lógica para lidar com a pesquisa
-    console.log('Termo de pesquisa:', searchTerm);
-  };
+const BookSearch = () => {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Busca rápida"
-        value={searchTerm}
-        onChangeText={setSearchTerm}
-      />
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: '#a0ccb0' }]}
-        onPress={handleSearch}
-      >
-        <Text style={styles.buttonText}>Pesquisar</Text>
-      </TouchableOpacity>
       <BookList showAddButton={true} showRemoveButton={true} />
     </View>
   );
@@ -55,4 +37,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Book;
+export default BookSearch;

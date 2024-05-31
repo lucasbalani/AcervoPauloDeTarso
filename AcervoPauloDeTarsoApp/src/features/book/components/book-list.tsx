@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Avatar, Box, Button, Divider, HStack, Pressable, Spacer, VStack, useTheme } from "native-base";
+import { Avatar, Box, Button, Divider, HStack, Input, Pressable, Spacer, VStack, useTheme } from "native-base";
 import { useEffect, useRef, useState } from "react";
 import { FlatList, Text } from "react-native";
 import Book from "../models/book.model";
@@ -13,97 +13,109 @@ import { isLoadingFindBook } from "../states/isLoadingFindBook";
 import { clearBookForm } from "../states/clearBookForm";
 
 interface BookListProps {
-    showAddButton?: boolean;
-    showRemoveButton?: boolean;
+  showAddButton?: boolean;
+  showRemoveButton?: boolean;
 }
 
 const BookList = ({ showAddButton = false, showRemoveButton = false }: BookListProps) => {
-    const [books, setBooks] = useState<Book[]>([]);
-    const [isLoading, setIsLoading] = useRecoilState(!!showAddButton ? isLoadingBookAdmin : isLoadingBookHome);
-    const [loadingBookHome, setIsLoadingBookHome] = useRecoilState(isLoadingBookHome);
-    const [loadingBookAdmin, setIsLoadingBookAdmin] = useRecoilState(isLoadingBookAdmin);
+  const [books, setBooks] = useState<Book[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
-    const [loadingFindBook, setIsLoadingFindBook] = useRecoilState(isLoadingFindBook);
-    const [clearBookPage, setClearBookPage] = useRecoilState(clearBookForm);
+  const [isLoading, setIsLoading] = useRecoilState(!!showAddButton ? isLoadingBookAdmin : isLoadingBookHome);
+  const [loadingBookHome, setIsLoadingBookHome] = useRecoilState(isLoadingBookHome);
+  const [loadingBookAdmin, setIsLoadingBookAdmin] = useRecoilState(isLoadingBookAdmin);
 
-    const navigation: NavigationProp<ParamListBase> = useNavigation();
-    const appTheme = useTheme();
+  const [loadingFindBook, setIsLoadingFindBook] = useRecoilState(isLoadingFindBook);
+  const [clearBookPage, setClearBookPage] = useRecoilState(clearBookForm);
 
-    const navigationRef = useRef(null);
+  const navigation: NavigationProp<ParamListBase> = useNavigation();
+  const appTheme = useTheme();
 
-    const fetchData = async () => {
-        const db = await connectToDatabase();
-        const allBooks = await BookService.instance.list(db);
+  const navigationRef = useRef(null);
 
-        // agrupar os livros por classificação
-        const groupedBooks = allBooks.reduce((grouped, book) => {
-            (grouped[book.classification] =
-              grouped[book.classification] || []).push(book);
-            return grouped;
-        }, {});
+  const fetchData = async () => {
+    const db = await connectToDatabase();
+    const allBooks = !!searchTerm ? await BookService.instance.listBySearchTerm(db, searchTerm) : await BookService.instance.list(db);
 
-
-        /// transformar o objeto agrupado em um array achatado
-        const flatListData = Object.entries(groupedBooks).reduce(
-          (list, [classification, books]) => {
-            return list.concat(
-              {type: 'header', classification},
-              ...books.map(book => ({type: 'book', ...book})),
-            );
-            }
-        , []);
-        
+    // agrupar os livros por classificação
+    const groupedBooks = allBooks.reduce((grouped, book) => {
+      (grouped[book.classification] =
+        grouped[book.classification] || []).push(book);
+      return grouped;
+    }, {});
 
 
-        setBooks(flatListData);
-        setIsLoading(false);
-    }
+    /// transformar o objeto agrupado em um array achatado
+    const flatListData = Object.entries(groupedBooks).reduce(
+      (list, [classification, books]) => {
+        return list.concat(
+          { type: 'header', classification },
+          ...books.map(book => ({ type: 'book', ...book })),
+        );
+      }
+      , []);
 
-    const connectToDatabase = async () => {
-        return openDatabase(
-            { name: "acervoPauloDeTarsoApp.db", location: "default" },
-            () => { },
-            (error) => {
-                console.error(error)
-                throw Error("Could not connect to database")
-            }
-        )
-    }
 
-    const selectBook = (bookSelectedId: number) => {
-        setIsLoadingFindBook(true);
 
-        navigation.navigate("BookForm", { bookId: bookSelectedId })
-    }
+    setBooks(flatListData);
+    setIsLoading(false);
+  }
 
-    const removeBook = async (bookId: number) => {
-        await BookService.instance.removeBook(await connectToDatabase(), bookId)
+  const connectToDatabase = async () => {
+    return openDatabase(
+      { name: "acervoPauloDeTarsoApp.db", location: "default" },
+      () => { },
+      (error) => {
+        console.error(error)
+        throw Error("Could not connect to database")
+      }
+    )
+  }
 
-        setIsLoadingBookAdmin(true);
-        setIsLoadingBookHome(true);
-        setIsLoading(true);
-    }
+  const selectBook = (bookSelectedId: number) => {
+    setIsLoadingFindBook(true);
 
-    const newBook = () => {
-        setClearBookPage(true);
+    navigation.navigate("BookForm", { bookId: bookSelectedId })
+  }
 
-        navigation.navigate("BookForm", { bookId: undefined });
-    }
+  const removeBook = async (bookId: number) => {
+    await BookService.instance.removeBook(await connectToDatabase(), bookId)
 
-    useEffect(() => {
-        if (isLoading)
-            fetchData()
+    setIsLoadingBookAdmin(true);
+    setIsLoadingBookHome(true);
+    setIsLoading(true);
+  }
 
-    }, [books, isLoading]);
+  const newBook = () => {
+    setClearBookPage(true);
 
-    return (
-      <Box style={{padding: 8}}>
+    navigation.navigate("BookForm", { bookId: undefined });
+  }
+
+  useEffect(() => {
+    if (isLoading)
+      fetchData()
+
+  }, [books, isLoading]);
+
+  useEffect(() => {
+    fetchData()
+  }, [searchTerm]);
+
+  return (
+    <>
+      <Input
+        placeholder="Pesquisar"
+        onChangeText={setSearchTerm}
+        value={searchTerm}
+      />
+      <Box style={{ padding: 8 }}>
         <HStack
           p="4"
           w="100%"
           justifyContent={'space-between'}
           alignItems="center">
-          <Text style={{fontWeight: 'bold', fontSize: 20}}>Livros</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 20 }}>Livros</Text>
           {!!showAddButton && (
             <Button shadow={2} onPress={() => newBook()}>
               <FontAwesomeIcon icon={'plus'} />
@@ -115,14 +127,14 @@ const BookList = ({ showAddButton = false, showRemoveButton = false }: BookListP
         {/* </Heading> */}
         <FlatList
           data={books}
-          renderItem={({item}) => {
+          renderItem={({ item }) => {
             if (item.type === 'header') {
               return (
                 <Box
                   p="4"
                   w="100%"
-                  >
-                  <Text style={{fontWeight: 'bold', fontSize: 20}}>
+                >
+                  <Text style={{ fontWeight: 'bold', fontSize: 20 }}>
                     {item.classification === 'null'
                       ? 'Sem classificação'
                       : item.classification}
@@ -153,7 +165,7 @@ const BookList = ({ showAddButton = false, showRemoveButton = false }: BookListP
                         shadow={2}
                         onPress={() => removeBook(item.id)}
                         colorScheme="danger"
-                        style={{ marginLeft:-25}}>
+                        style={{ marginLeft: -25 }}>
                         <FontAwesomeIcon icon={'trash'} />
                       </Button>
                     )}
@@ -165,7 +177,8 @@ const BookList = ({ showAddButton = false, showRemoveButton = false }: BookListP
           keyExtractor={(item, index) => index.toString()}
         />
       </Box>
-    );
+    </>
+  );
 }
 
 export default BookList;

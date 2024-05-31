@@ -1,20 +1,15 @@
-import 'react-native-gesture-handler';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons';
 import {
   ITheme,
   NativeBaseProvider,
   extendTheme
 } from 'native-base';
 import React, { useCallback, useEffect } from 'react';
-import Home from './src/features/home/home';
-import Book from './src/features/book/book';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import Routes from './src/Routes';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { fas } from '@fortawesome/free-solid-svg-icons';
+import 'react-native-gesture-handler';
 import { SQLiteDatabase, enablePromise, openDatabase } from 'react-native-sqlite-storage';
 import { RecoilRoot } from 'recoil';
+import Routes from './src/Routes';
 
 enablePromise(true)
 
